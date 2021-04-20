@@ -2,8 +2,9 @@ function I = simiterintegrals(W, h, eps, varargin)
 %SIMITERINTEGRALS Simulates twice iterated stochastic integrals.
 %   I = SIMITERINTEGRALS(W,H,EPS) simulates the twice iterated stochastic
 %   integral w.r.t the increment of a Wiener process W over stepsize H.
-%   The algorithm guarantees that the maximal one-element root mean-square 
-%   error is less than or equal to EPS. 
+%   The algorithm guarantees that the error is less than or equal to EPS.
+%   For SDEs the Maximum-L2 error estimate is used, whereas for SPDEs 
+%   the Frobenius-L2 error estimate is used.
 %
 %   If the integrals are to be used in a SDE solver scheme then EPS should
 %   typically be chosen as H^(p+0.5) where p is the order of the SDE scheme.
@@ -20,8 +21,8 @@ function I = simiterintegrals(W, h, eps, varargin)
 %
 %   'Algorithm', the algorithm to use for the simulation
 %
-%       Possible values are 'Fourier' and 'Wiktorsson'. 
-%       The default value is 'Fourier'.
+%       Possible values are 'Fourier', 'Milstein', 'Wiktorsson' and 'MR'. 
+%       The default value is 'MR'.
 %
 %   'MemUse', a scaling parameter for the memory usage
 %
@@ -51,7 +52,7 @@ addRequired(ip,'StepSize',@(x) (x>0) && isnumeric(x) && isscalar(x));
 addRequired(ip,'Error',@(x) (x>0) && isnumeric(x) && isscalar(x));
 addParameter(ip,'ItoCorrection',true,@(x) isscalar(x) && ...
     (islogical(x) || (isnumeric(x) && (x == 0 || x == 1))));
-addParameter(ip,'Algorithm',"fourier",@(x) isstring(x) || ischar(x));
+addParameter(ip,'Algorithm',"mr",@(x) isstring(x) || ischar(x));
 addParameter(ip,'MemUse',1,@(x) isscalar(x) && isnumeric(x) && ...
     0<=x && x<=1);
 addParameter(ip,'q_12',ones(m,1),@(x) isnumeric(x) && ...
@@ -64,32 +65,42 @@ if all(ip.Results.q_12 == 1)
     % standard Wiener process
     switch lower(ip.Results.Algorithm)
         case "fourier"
-            n = ceil( 0.5*(h/(pi*eps))^2 );
+            n = ceil( 1.5*(h/(pi*eps))^2 );
             I = h*levyarea_fourier(W/sqrt(h),n,ip.Results.MemUse);
+        case "milstein"
+            n = ceil( 0.5*(h/(pi*eps))^2 );
+            I = h*levyarea_milstein(W/sqrt(h),n,ip.Results.MemUse);
         case "wiktorsson"
-            n = ceil( sqrt(m*(m-1)*(m+4*(W'*W)/h)/6) * h/(2*pi*eps) );
+            n = ceil( sqrt(5*m/12) * h/(pi*eps) );
             I = h*levyarea_wik(W/sqrt(h),n,ip.Results.MemUse);
+        case "mr"
+            n = ceil( sqrt(m/12) * h/(pi*eps) );
+            I = h*levyarea_mr(W/sqrt(h),n,ip.Results.MemUse);
         otherwise
             error("Unknown algorithm: " + ip.Results.Algorithm + ...
-                ". Possible choices are: Fourier, Wiktorsson.");
+                ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
     end
 else
     % Q-Wiener process with covariance matrix Q=diag(q_12)^2
     sqcov = sqrt(h)*ip.Results.q_12;
+    coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
     switch lower(ip.Results.Algorithm)
         case "fourier"
-            n = ceil( ((sqcov'*sqcov)/(pi*eps))^2 ); % here we ignored a constant factor
+            n = ceil( 1.5*(coeff*h/(pi*eps))^2 );
+            I = diag(sqcov)*levyarea_fourier(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+        case "milstein"
+            n = ceil( 0.5*(coeff*h/(pi*eps))^2 );
             I = diag(sqcov)*levyarea_fourier(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
         case "wiktorsson"
-            [q_min,q_max] = bounds(ip.Results.q_12);
-            p1 = q_max*m*sqrt(m-1);
-            p2 = sqrt(q_max*(q_12'*q_12)^3)/q_min;
-            n = ceil( min(p1,p2)*h/eps ); % again ignoring a constant factor
+            n = ceil( sqrt(5*m/12) * coeff*h/(pi*eps) );
             I = diag(sqcov)*levyarea_wik(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+        case "mr"
+            n = ceil( sqrt(m/12) * coeff*h/(pi*eps) );
+            I = diag(sqcov)*levyarea_mr(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
         otherwise
             error("Unknown algorithm for Q-Wiener processes: " + ...
                 ip.Results.Algorithm + ...
-                ". Possible choices are: Fourier, Wiktorsson.");
+                ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
     end
 end
 
@@ -105,6 +116,35 @@ end % simiterintegrals
 
 
 function I = levyarea_fourier(W, n, mem_use)
+    m = length(W);
+    
+    if mem_use == 1
+        alpha = randn(n,m);
+        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+        S = beta * alpha;
+    elseif ~(0<=mem_use && mem_use<=1)
+        error("Parameter 'mem_use' must be in [0,1].");
+    else
+        if mem_use == 0
+            num_iter = n;
+            n_small = 1;
+        else
+            num_iter = ceil(1/mem_use);
+            n_small = ceil(n/num_iter);
+        end
+        S = zeros(m,m);
+        for i = 1:num_iter
+            alpha = randn(n_small,m);
+            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
+            S = S + beta * alpha;
+        end
+    end
+    
+    I = (S-S')/(2*pi);
+end % levyarea_fourier
+
+
+function I = levyarea_milstein(W, n, mem_use)
     m = length(W);
     
     if mem_use == 1
@@ -134,7 +174,7 @@ function I = levyarea_fourier(W, n, mem_use)
     M = randn(1,m);
     S = S + sqrt(2*psi(1,last_index+1)) * W.*M;
     I = (S-S')/(2*pi);
-end % levyarea_fourier
+end % levyarea_milstein
 
 
 function G = levyarea_wik(W, n, mem_use)
@@ -169,3 +209,38 @@ function G = levyarea_wik(W, n, mem_use)
     S = S + ((G-G')*W).*W'./(1+sqrt(1+norm(W)^2)) + G;
     G = (S-S')/(2*pi);
 end % levyarea_wik
+
+
+function G = levyarea_mr(W, n, mem_use)
+    m = length(W);
+    
+    if mem_use == 1
+        alpha = randn(n,m);
+        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+        S = beta * alpha;
+        last_index = n;
+    elseif ~(0<=mem_use && mem_use<=1)
+        error("Parameter 'mem_use' must be in [0,1].");
+    else
+        if mem_use == 0
+            num_iter = n;
+            n_small = 1;
+        else
+            num_iter = ceil(1/mem_use);
+            n_small = ceil(n/num_iter);
+        end
+        last_index = num_iter*n_small;
+        S = zeros(m,m);
+        for i = 1:num_iter
+            alpha = randn(n_small,m);
+            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
+            S = S + beta * alpha;
+        end
+    end
+    
+    M = randn(1,m);
+    G = zeros(m);
+    G(tril(true(m),-1)) = randn(m*(m-1)/2,1);
+    S = S + sqrt(2*psi(1,last_index+1)) * (W.*M + G);
+    G = (S-S')/(2*pi);
+end % levyarea_mr
