@@ -2,7 +2,8 @@ function I = simiterintegrals(W, h, eps, varargin)
 %SIMITERINTEGRALS Simulates twice iterated stochastic integrals.
 %   I = SIMITERINTEGRALS(W,H,EPS) simulates the twice iterated stochastic
 %   integral w.r.t the increment of a Wiener process W over stepsize H.
-%   The algorithm guarantees that the error is less than or equal to EPS.
+%   The algorithm guarantees that the error is less than or equal to EPS in
+%   the specified error norm.
 %   For SDEs the Maximum-L2 error estimate is used, whereas for SPDEs 
 %   the Frobenius-L2 error estimate is used.
 %
@@ -37,7 +38,15 @@ function I = simiterintegrals(W, h, eps, varargin)
 %       When 'q_12' is supplied, W is assumed to be a finite-dimensional
 %       approximation of an infinite Q-Wiener process with covariance
 %       matrix Q=diag(q_12)^2. 
-%       Default value is a vector of ones.
+%       The default value is a vector of ones.
+%
+%   'ErrorNorm', which norm to use for the error estimate
+%
+%       Possible values are 'Auto', 'MaxL2' and 'FrobeniusL2'. For SDEs usually
+%       the Maximum-L2 error estimate is needed, whereas for SPDEs the 
+%       Frobenius-L2 error estimate is needed. 'Auto' chooses 'MaxL2' if
+%       'q_12' is a vector of ones and 'FrobeniusL2' otherwise.
+%       The default value is 'Auto'.
 %       
 %
 
@@ -57,51 +66,51 @@ addParameter(ip,'MemUse',1,@(x) isscalar(x) && isnumeric(x) && ...
     0<=x && x<=1);
 addParameter(ip,'q_12',ones(m,1),@(x) isnumeric(x) && ...
     length(x)==m && iscolumn(x));
+addParameter(ip,'ErrorNorm',"auto",@(x) isstring(x) || ischar(x))
 parse(ip,W,h,eps,varargin{:});
+
+% interpret error norm and set the scaling factor for Q-Wiener processes
+% (Frobenius-L2 error < coeff * Maximum-L2 error)
+switch lower(ip.Results.ErrorNorm)
+    case "maxl2"
+        % maximum(q_12[i]*q_12[j] for i=1:m for j=1:i-1)
+        Q = ip.Results.q_12*ip.Results.q_12';
+        norm_coeff = max(Q(~eye(m)));
+    case "frobeniusl2"
+        norm_coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
+    case "auto"
+        if all(ip.Results.q_12 == 1)
+            % maximum(q_12[i]*q_12[j] for i=1:m for j=1:i-1)
+            Q = ip.Results.q_12*ip.Results.q_12';
+            norm_coeff = max(Q(~eye(m)));
+        else
+            norm_coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
+        end
+    otherwise
+        error("Unknown error norm: " + ip.Results.ErrorNorm + ...
+        ". Possible choices are: Auto, MaxL2, FrobeniusL2.");
+end
 
 % calculate the number of terms needed for the given precision
 % and the Levy area using the chosen algorithm
-if all(ip.Results.q_12 == 1)
-    % standard Wiener process
-    switch lower(ip.Results.Algorithm)
-        case "fourier"
-            n = ceil( 1.5*(h/(pi*eps))^2 );
-            I = h*levyarea_fourier(W/sqrt(h),n,ip.Results.MemUse);
-        case "milstein"
-            n = ceil( 0.5*(h/(pi*eps))^2 );
-            I = h*levyarea_milstein(W/sqrt(h),n,ip.Results.MemUse);
-        case "wiktorsson"
-            n = ceil( sqrt(5*m/12) * h/(pi*eps) );
-            I = h*levyarea_wik(W/sqrt(h),n,ip.Results.MemUse);
-        case "mr"
-            n = ceil( sqrt(m/12) * h/(pi*eps) );
-            I = h*levyarea_mr(W/sqrt(h),n,ip.Results.MemUse);
-        otherwise
-            error("Unknown algorithm: " + ip.Results.Algorithm + ...
-                ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
-    end
-else
-    % Q-Wiener process with covariance matrix Q=diag(q_12)^2
-    sqcov = sqrt(h)*ip.Results.q_12;
-    coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
-    switch lower(ip.Results.Algorithm)
-        case "fourier"
-            n = ceil( 1.5*(coeff*h/(pi*eps))^2 );
-            I = diag(sqcov)*levyarea_fourier(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
-        case "milstein"
-            n = ceil( 0.5*(coeff*h/(pi*eps))^2 );
-            I = diag(sqcov)*levyarea_fourier(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
-        case "wiktorsson"
-            n = ceil( sqrt(5*m/12) * coeff*h/(pi*eps) );
-            I = diag(sqcov)*levyarea_wik(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
-        case "mr"
-            n = ceil( sqrt(m/12) * coeff*h/(pi*eps) );
-            I = diag(sqcov)*levyarea_mr(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
-        otherwise
-            error("Unknown algorithm for Q-Wiener processes: " + ...
-                ip.Results.Algorithm + ...
-                ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
-    end
+sqcov = sqrt(h)*ip.Results.q_12;
+switch lower(ip.Results.Algorithm)
+    case "fourier"
+        n = ceil( 1.5*(norm_coeff*h/(pi*eps))^2 );
+        I = diag(sqcov)*levyarea_fourier(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+    case "milstein"
+        n = ceil( 0.5*(norm_coeff*h/(pi*eps))^2 );
+        I = diag(sqcov)*levyarea_milstein(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+    case "wiktorsson"
+        n = ceil( sqrt(5*m/12) * norm_coeff*h/(pi*eps) );
+        I = diag(sqcov)*levyarea_wik(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+    case "mr"
+        n = ceil( sqrt(m/12) * norm_coeff*h/(pi*eps) );
+        I = diag(sqcov)*levyarea_mr(W./sqcov,n,ip.Results.MemUse)*diag(sqcov);
+    otherwise
+        error("Unknown algorithm for Q-Wiener processes: " + ...
+            ip.Results.Algorithm + ...
+            ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
 end
 
 % calculate iterated integrals
