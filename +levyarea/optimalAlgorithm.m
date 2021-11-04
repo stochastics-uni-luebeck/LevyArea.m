@@ -1,4 +1,4 @@
-function alg = optimal_algorithm(dim, h, eps, varargin)
+function alg = optimalAlgorithm(dim, h, eps, varargin)
 %OPTIMAL_ALGORITHM Determines the optimal algorithm for SIMITERINTEGRALS.
 %   ALG = OPTIMAL_ALGORITHM(DIM, H, EPS) determines the optimal algorithm
 %   under the given parameters, i.e. the algorithm that needs to simulate
@@ -13,30 +13,33 @@ ip = inputParser;
 addRequired(ip,'Dimension',@(x) (x>0) && isnumeric(x) && isscalar(x));
 addRequired(ip,'StepSize',@(x) (x>0) && isnumeric(x) && isscalar(x));
 addRequired(ip,'Error',@(x) (x>0) && isnumeric(x) && isscalar(x));
-addParameter(ip,'q_12',ones(dim,1),@(x) isnumeric(x) && ...
+addParameter(ip,'QWiener',ones(dim,1),@(x) isnumeric(x) && ...
     length(x)==dim && iscolumn(x));
 addParameter(ip,'ErrorNorm',"auto",@(x) isstring(x) || ischar(x))
 parse(ip,dim,h,eps,varargin{:});
 
+if ip.Results.ErrorNorm == "auto"
+    if all(ip.Results.QWiener == 1)
+        err_norm = "maxl2";
+    else
+        err_norm = "frobeniusl2";
+    end
+else
+    err_norm = ip.Results.ErrorNorm;
+end
+
 % interpret error norm and set the scaling factor for Q-Wiener processes
 % (Frobenius-L2 error < coeff * Maximum-L2 error)
-switch lower(ip.Results.ErrorNorm)
+q_12 = ip.Results.QWiener;
+switch lower(err_norm)
     case "maxl2"
         % maximum(q_12[i]*q_12[j] for i=1:m for j=1:i-1)
-        Q = ip.Results.q_12*ip.Results.q_12';
-        norm_coeff = max(Q(~eye(m)));
+        Q = q_12*q_12';
+        norm_coeff = max(Q(~eye(dim)));
     case "frobeniusl2"
-        norm_coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
-    case "auto"
-        if all(ip.Results.q_12 == 1)
-            % maximum(q_12[i]*q_12[j] for i=1:m for j=1:i-1)
-            Q = ip.Results.q_12*ip.Results.q_12';
-            norm_coeff = max(Q(~eye(m)));
-        else
-            norm_coeff = sqrt(sum(ip.Results.q_12.^2)^2-sum(ip.Results.q_12.^4));
-        end
+        norm_coeff = sqrt(sum(q_12.^2)^2-sum(q_12.^4));
     otherwise
-        error("Unknown error norm: " + ip.Results.ErrorNorm + ...
+        error("Unknown error norm: " + err_norm + ...
         ". Possible choices are: Auto, MaxL2, FrobeniusL2.");
 end
 
