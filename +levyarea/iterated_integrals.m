@@ -1,6 +1,6 @@
-function I = iteratedIntegrals(W, h, varargin)
-%ITERATEDINTEGRALS Simulates twice iterated stochastic integrals.
-%   I = ITERATEDINTEGRALS(W,H,EPS) simulates the twice iterated stochastic
+function I = iterated_integrals(W, h, varargin)
+%ITERATED_INTEGRALS Simulates twice iterated stochastic integrals.
+%   I = ITERATED_INTEGRALS(W,H,EPS) simulates the twice iterated stochastic
 %   integral w.r.t. the increment of a Wiener process W over stepsize H.
 %   The algorithm guarantees that the error is less than or equal to EPS in
 %   the specified error norm.
@@ -10,7 +10,7 @@ function I = iteratedIntegrals(W, h, varargin)
 %   If the integrals are to be used in a SDE solver scheme then EPS should
 %   typically be chosen as H^(p+0.5) where p is the order of the SDE scheme.
 %   
-%   I = ITERATEDINTEGRALS(W,H,EPS,PARAM1,VAL1,PARAM2,VAL2,...) performs
+%   I = ITERATED_INTEGRALS(W,H,EPS,PARAM1,VAL1,PARAM2,VAL2,...) performs
 %   the simulation with specified values of optional parameters.
 %   The available parameters are
 %
@@ -73,7 +73,7 @@ parse(ip,W,h,varargin{:});
 
 eps = ip.Results.Error;
 if ip.Results.Algorithm == "auto"
-    alg = levyarea.optimalAlgorithm(m,h,eps);
+    alg = levyarea.optimal_algorithm(m,h,eps);
 else
     alg = ip.Results.Algorithm;
 end
@@ -90,4 +90,4 @@ end
 I = levyarea.simulate(W,h,eps,ip.Results.ItoCorrection,alg,...
     ip.Results.MemUse,ip.Results.QWiener,err_norm);
 
-end % iteratedIntegrals
+end % iterated_integrals

@@ -22,7 +22,7 @@ W =
     0.0463
     0.0907
 
->> II = levyarea.iteratedIntegrals(W,h, h^(3/2))
+>> II = levyarea.iterated_integrals(W,h, h^(3/2))
 
 II =
 
@@ -44,8 +44,8 @@ ans =
 ```
 Alternatively you can import one or all functions:
 ```matlab
->> import levyarea.iteratedIntegrals
->> II = iteratedIntegrals(W,h, h^(3/2))
+>> import levyarea.iterated_integrals
+>> II = iterated_integrals(W,h, h^(3/2))
 
 II =
 
@@ -55,3 +55,5 @@ II =
    -0.0030    0.0007    0.0058   -0.0039   -0.0036
     0.0008    0.0078    0.0149    0.0078   -0.0009
 ```
+
+See also the examples in `example.m` and `help iterated_integrals` for further information.

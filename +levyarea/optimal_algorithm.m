@@ -1,11 +1,11 @@
-function alg = optimalAlgorithm(dim, h, eps, varargin)
+function alg = optimal_algorithm(dim, h, eps, varargin)
 %OPTIMAL_ALGORITHM Determines the optimal algorithm for SIMITERINTEGRALS.
 %   ALG = OPTIMAL_ALGORITHM(DIM, H, EPS) determines the optimal algorithm
 %   under the given parameters, i.e. the algorithm that needs to simulate
 %   the fewest random numbers to achieve the desired precision.
 %
 %   This function accepts the optional parameters 'q_12' and 'ErrorNorm' as
-%   specified for SIMITERINTEGRALS.
+%   specified for ITERATED_INTEGRALS.
 
 % check input arguments
 narginchk(3,inf);
@@ -62,3 +62,5 @@ costs(4) = 2*n*dim+(dim^2-dim)/2+dim;
 % find minimum
 [~,idx] = min(costs);
 alg = algs(idx);
+
+end % optimal_algorithm
