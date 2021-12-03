@@ -1,10 +1,10 @@
 function alg = optimal_algorithm(dim, h, eps, varargin)
-%OPTIMAL_ALGORITHM Determines the optimal algorithm for SIMITERINTEGRALS.
+%OPTIMAL_ALGORITHM Determines the optimal algorithm for ITERATED_INTEGRALS.
 %   ALG = OPTIMAL_ALGORITHM(DIM, H, EPS) determines the optimal algorithm
 %   under the given parameters, i.e. the algorithm that needs to simulate
 %   the fewest random numbers to achieve the desired precision.
 %
-%   This function accepts the optional parameters 'q_12' and 'ErrorNorm' as
+%   This function accepts the optional parameters 'QWiener' and 'ErrorNorm' as
 %   specified for ITERATED_INTEGRALS.
 
 % check input arguments
