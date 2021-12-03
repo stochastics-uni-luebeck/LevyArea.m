@@ -1,17 +1,20 @@
 function I = iterated_integrals(W, h, varargin)
 %ITERATED_INTEGRALS Simulates twice iterated stochastic integrals.
-%   I = ITERATED_INTEGRALS(W,H,EPS) simulates the twice iterated stochastic
+%   I = ITERATED_INTEGRALS(W,H) simulates the twice iterated stochastic
 %   integral w.r.t. the increment of a Wiener process W over stepsize H.
-%   The algorithm guarantees that the error is less than or equal to EPS in
-%   the specified error norm.
-%   For SDEs the Maximum-L2 error estimate is used, whereas for SPDEs 
-%   the Frobenius-L2 error estimate is used.
+%   The algorithm guarantees that the error is less than or equal to
+%   H^(3/2) in the Max-L2 error norm.
 %
-%   If the integrals are to be used in a SDE solver scheme then EPS should
+%   I = ITERATED_INTEGRALS(W,H,Err) simulates the twice iterated stochastic
+%   integral w.r.t. the increment of a Wiener process W over stepsize H.
+%   The algorithm guarantees that the error is less than or equal to Err in
+%   the Max-L2 error norm.
+%
+%   If the integrals are to be used in a SDE solver scheme then ERR should
 %   typically be chosen as H^(p+0.5) where p is the order of the SDE scheme.
 %   
-%   I = ITERATED_INTEGRALS(W,H,EPS,PARAM1,VAL1,PARAM2,VAL2,...) performs
-%   the simulation with specified values of optional parameters.
+%   I = ITERATED_INTEGRALS(___,Name,Value) performs
+%   the simulation with the specified values of optional parameters.
 %   The available parameters are
 %
 %   'ItoCorrection', whether to apply Ito correction
@@ -22,16 +25,10 @@ function I = iterated_integrals(W, h, varargin)
 %
 %   'Algorithm', the algorithm to use for the simulation
 %
-%       Possible values are 'Fourier', 'Milstein', 'Wiktorsson' and 'MR'. 
-%       The default value is 'MR'.
-%
-%   'MemUse', a scaling parameter for the memory usage
-%
-%       Possible values are in the interval [0,1]. This parameter scales
-%       between the minimum required memory usage ('MemUse'=0) and the
-%       maximum memory usage ('MemUse'=1). This is not a linear scale.
-%       Typically a higher memory usage leads to faster execution times.
-%       The default value is 1.
+%       Possible values are 'Auto', 'Fourier', 'Milstein', 'Wiktorsson'
+%       and 'MR'. 'Auto' chooses the algorithm according to
+%       `levyarea.optimal_algorithm`. 
+%       The default value is 'Auto'.
 %
 %   'QWiener', square roots of the eigenvalues of the covariance operator
 %              of a Q-Wiener process with Q=diag(QWiener)^2
@@ -49,7 +46,7 @@ function I = iterated_integrals(W, h, varargin)
 %       'q_12' is a vector of ones and 'FrobeniusL2' otherwise.
 %       The default value is 'Auto'.
 %       
-%
+%   See also OPTIMAL_ALGORITHM.
 
 % dimension of the Wiener process
 m = length(W);
@@ -64,16 +61,14 @@ addParameter(ip,'ItoCorrection',true,@(x) isscalar(x) && ...
     (islogical(x) || (isnumeric(x) && (x == 0 || x == 1))));
 addParameter(ip,'Algorithm',"auto",...
     @(x) isstring(x) || ischar(x));
-addParameter(ip,'MemUse',1,@(x) isscalar(x) && isnumeric(x) && ...
-    0<=x && x<=1);
 addParameter(ip,'QWiener',ones(m,1),@(x) isnumeric(x) && ...
     length(x)==m && iscolumn(x));
 addParameter(ip,'ErrorNorm',"auto",@(x) isstring(x) || ischar(x))
 parse(ip,W,h,varargin{:});
 
-eps = ip.Results.Error;
+err = ip.Results.Error;
 if ip.Results.Algorithm == "auto"
-    alg = levyarea.optimal_algorithm(m,h,eps);
+    alg = levyarea.optimal_algorithm(m,h,err);
 else
     alg = ip.Results.Algorithm;
 end
@@ -87,7 +82,7 @@ else
     err_norm = ip.Results.ErrorNorm;
 end
 
-I = levyarea.simulate(W,h,eps,ip.Results.ItoCorrection,alg,...
-    ip.Results.MemUse,ip.Results.QWiener,err_norm);
+I = levyarea.simulate(W,h,err,ip.Results.ItoCorrection,alg,...
+    ip.Results.QWiener,err_norm);
 
 end % iterated_integrals

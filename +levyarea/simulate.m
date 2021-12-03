@@ -1,7 +1,9 @@
-function I = simulate(W, h, eps, ito, alg, mem_use, q_12, err_norm)
+function I = simulate(W, h, err, ito, alg, q_12, err_norm)
+%SIMULATE The core routine to simulate iterated integrals.
+% See also ITERATED_INTEGRALS, OPTIMAL_ALGORITHM.
 
-% check input arguments
-narginchk(8,8);
+% check number of input arguments
+narginchk(7,7);
 
 % dimension of the Wiener process
 m = length(W);
@@ -25,17 +27,17 @@ end
 sqcov = sqrt(h)*q_12;
 switch lower(alg)
     case "fourier"
-        n = ceil( 1.5*(norm_coeff*h/(pi*eps))^2 );
-        I = diag(sqcov)*levyarea_fourier(W./sqcov,n,mem_use)*diag(sqcov);
+        n = ceil( 1.5*(norm_coeff*h/(pi*err))^2 );
+        I = diag(sqcov)*levyarea_fourier(W./sqcov,n)*diag(sqcov);
     case "milstein"
-        n = ceil( 0.5*(norm_coeff*h/(pi*eps))^2 );
-        I = diag(sqcov)*levyarea_milstein(W./sqcov,n,mem_use)*diag(sqcov);
+        n = ceil( 0.5*(norm_coeff*h/(pi*err))^2 );
+        I = diag(sqcov)*levyarea_milstein(W./sqcov,n)*diag(sqcov);
     case "wiktorsson"
-        n = ceil( sqrt(5*m/12) * norm_coeff*h/(pi*eps) );
-        I = diag(sqcov)*levyarea_wik(W./sqcov,n,mem_use)*diag(sqcov);
+        n = ceil( sqrt(5*m/12) * norm_coeff*h/(pi*err) );
+        I = diag(sqcov)*levyarea_wik(W./sqcov,n)*diag(sqcov);
     case "mr"
-        n = ceil( sqrt(m/12) * norm_coeff*h/(pi*eps) );
-        I = diag(sqcov)*levyarea_mr(W./sqcov,n,mem_use)*diag(sqcov);
+        n = ceil( sqrt(m/12) * norm_coeff*h/(pi*err) );
+        I = diag(sqcov)*levyarea_mr(W./sqcov,n)*diag(sqcov);
     otherwise
         error("Unknown algorithm for Q-Wiener processes: " + ...
             ip.Results.Algorithm + ...
@@ -53,132 +55,47 @@ end
 end % simulate
 
 
-function I = levyarea_fourier(W, n, mem_use)
+function I = levyarea_fourier(W, n)
     m = length(W);
-    
-    if mem_use == 1
-        alpha = randn(n,m);
-        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-        S = beta * alpha;
-    elseif ~(0<=mem_use && mem_use<=1)
-        error("Parameter 'mem_use' must be in [0,1].");
-    else
-        if mem_use == 0
-            num_iter = n;
-            n_small = 1;
-        else
-            num_iter = ceil(1/mem_use);
-            n_small = ceil(n/num_iter);
-        end
-        S = zeros(m,m);
-        for i = 1:num_iter
-            alpha = randn(n_small,m);
-            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
-            S = S + beta * alpha;
-        end
-    end
-    
+    alpha = randn(n,m);
+    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+    S = beta * alpha;
     I = (S-S')/(2*pi);
 end % levyarea_fourier
 
 
-function I = levyarea_milstein(W, n, mem_use)
+function I = levyarea_milstein(W, n)
     m = length(W);
-    
-    if mem_use == 1
-        alpha = randn(n,m);
-        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-        S = beta * alpha;
-        last_index = n;
-    elseif ~(0<=mem_use && mem_use<=1)
-        error("Parameter 'mem_use' must be in [0,1].");
-    else
-        if mem_use == 0
-            num_iter = n;
-            n_small = 1;
-        else
-            num_iter = ceil(1/mem_use);
-            n_small = ceil(n/num_iter);
-        end
-        last_index = num_iter*n_small;
-        S = zeros(m,m);
-        for i = 1:num_iter
-            alpha = randn(n_small,m);
-            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
-            S = S + beta * alpha;
-        end
-    end
-    
+    alpha = randn(n,m);
+    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+    S = beta * alpha;
     M = randn(1,m);
-    S = S + sqrt(2*psi(1,last_index+1)) * W.*M;
+    S = S + sqrt(2*psi(1,n+1)) * W.*M;
     I = (S-S')/(2*pi);
 end % levyarea_milstein
 
 
-function G = levyarea_wik(W, n, mem_use)
+function G = levyarea_wik(W, n)
     m = length(W);
-    
-    if mem_use == 1
-        alpha = randn(n,m);
-        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-        S = beta * alpha;
-        last_index = n;
-    elseif ~(0<=mem_use && mem_use<=1)
-        error("Parameter 'mem_use' must be in [0,1].");
-    else
-        if mem_use == 0
-            num_iter = n;
-            n_small = 1;
-        else
-            num_iter = ceil(1/mem_use);
-            n_small = ceil(n/num_iter);
-        end
-        last_index = num_iter*n_small;
-        S = zeros(m,m);
-        for i = 1:num_iter
-            alpha = randn(n_small,m);
-            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
-            S = S + beta * alpha;
-        end
-    end
-    
+    alpha = randn(n,m);
+    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+    S = beta * alpha;
     G = zeros(m);
-    G(tril(true(m),-1)) = sqrt(2*psi(1,last_index+1)) .* randn(m*(m-1)/2,1);
+    G(tril(true(m),-1)) = sqrt(2*psi(1,n+1)) .* randn(m*(m-1)/2,1);
     S = S + ((G-G')*W).*W'./(1+sqrt(1+norm(W)^2)) + G;
     G = (S-S')/(2*pi);
 end % levyarea_wik
 
 
-function G = levyarea_mr(W, n, mem_use)
+function G = levyarea_mr(W, n)
     m = length(W);
-    
-    if mem_use == 1
-        alpha = randn(n,m);
-        beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-        S = beta * alpha;
-        last_index = n;
-    elseif ~(0<=mem_use && mem_use<=1)
-        error("Parameter 'mem_use' must be in [0,1].");
-    else
-        if mem_use == 0
-            num_iter = n;
-            n_small = 1;
-        else
-            num_iter = ceil(1/mem_use);
-            n_small = ceil(n/num_iter);
-        end
-        last_index = num_iter*n_small;
-        S = zeros(m,m);
-        for i = 1:num_iter
-            alpha = randn(n_small,m);
-            beta = (randn(m,n_small) - sqrt(2).*W) ./ ((i-1)*n_small+1:i*n_small);
-            S = S + beta * alpha;
-        end
-    end
-    
+    alpha = randn(n,m);
+    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
+    S = beta * alpha;
     M = randn(1,m);
     G = zeros(m);
     G(tril(true(m),-1)) = randn(m*(m-1)/2,1);
-    S = S + sqrt(2*psi(1,last_index+1)) * (W.*M + G);
+    S = S + sqrt(2*psi(1,n+1)) * (W.*M + G);
     G = (S-S')/(2*pi);
 end % levyarea_mr
+

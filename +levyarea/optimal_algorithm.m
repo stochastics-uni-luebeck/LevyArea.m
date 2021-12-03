@@ -1,11 +1,14 @@
-function alg = optimal_algorithm(dim, h, eps, varargin)
-%OPTIMAL_ALGORITHM Determines the optimal algorithm for ITERATED_INTEGRALS.
-%   ALG = OPTIMAL_ALGORITHM(DIM, H, EPS) determines the optimal algorithm
+function alg = optimal_algorithm(dim, h, err, varargin)
+%OPTIMAL_ALGORITHM Determines the optimal algorithm for iterated_integrals.
+%   ALG = OPTIMAL_ALGORITHM(Dim,H,Err) determines the optimal algorithm
 %   under the given parameters, i.e. the algorithm that needs to simulate
 %   the fewest random numbers to achieve the desired precision.
 %
+%   Alg = OPTIMAL_ALGORITHM(___,Name,Value)
 %   This function accepts the optional parameters 'QWiener' and 'ErrorNorm' as
-%   specified for ITERATED_INTEGRALS.
+%   specified for iterated_integrals.
+%
+%   See also ITERATED_INTEGRALS.
 
 % check input arguments
 narginchk(3,inf);
@@ -16,7 +19,7 @@ addRequired(ip,'Error',@(x) (x>0) && isnumeric(x) && isscalar(x));
 addParameter(ip,'QWiener',ones(dim,1),@(x) isnumeric(x) && ...
     length(x)==dim && iscolumn(x));
 addParameter(ip,'ErrorNorm',"auto",@(x) isstring(x) || ischar(x))
-parse(ip,dim,h,eps,varargin{:});
+parse(ip,dim,h,err,varargin{:});
 
 if ip.Results.ErrorNorm == "auto"
     if all(ip.Results.QWiener == 1)
@@ -47,16 +50,16 @@ end
 algs = ["Fourier","Milstein","Wiktorsson","MR"];
 
 % Fourier
-n = ceil( 1.5*(norm_coeff*h/(pi*eps))^2 );
+n = ceil( 1.5*(norm_coeff*h/(pi*err))^2 );
 costs(1) = 2*n*dim;
 % Milstein
-n = ceil( 0.5*(norm_coeff*h/(pi*eps))^2 );
+n = ceil( 0.5*(norm_coeff*h/(pi*err))^2 );
 costs(2) = 2*n*dim+dim;
 % Wiktorsson
-n = ceil( sqrt(5*dim/12) * norm_coeff*h/(pi*eps) );
+n = ceil( sqrt(5*dim/12) * norm_coeff*h/(pi*err) );
 costs(3) = 2*n*dim+(dim^2-dim)/2;
 % MR
-n = ceil( sqrt(dim/12) * norm_coeff*h/(pi*eps) );
+n = ceil( sqrt(dim/12) * norm_coeff*h/(pi*err) );
 costs(4) = 2*n*dim+(dim^2-dim)/2+dim;
 
 % find minimum
