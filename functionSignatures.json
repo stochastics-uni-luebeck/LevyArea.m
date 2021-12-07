@@ -1,0 +1,40 @@
+{
+  "_schemaVersion": "1.0.0",
+  "levyarea.iterated_integrals":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Wiener Increment"},
+        {"name":"h", "kind":"required", "type":["numeric","scalar"], "purpose":"Step Size"},
+        {"name":"err", "kind":"ordered", "type":["numeric","scalar","positive"], "purpose":"Precision"},
+        {"name":"Algorithm", "kind":"namevalue", "type":["choices={'Auto','Fourier','Milstein','Wiktorsson','MR'}"], "purpose": "Algorithm"},
+        {"name":"ErrorNorm", "kind":"namevalue", "type":["choices={'Auto','MaxL2','FrobeniusL2'}"], "purpose":"Error Norm"},
+        {"name":"ItoCorrection", "kind":"namevalue", "type":["logical","scalar"], "purpose":"Ito Interpretation"},
+        {"name":"QWiener", "kind":"namevalue", "type":["numeric","column"], "purpose":"Square Roots of Eigenvalues of Covariance Operator"}
+     ]
+  },
+  "levyarea.optimal_algorithm":
+  {
+     "inputs":
+     [
+        {"name":"m", "kind":"required", "type":["numeric","column"], "purpose":"Dimension"},
+        {"name":"h", "kind":"required", "type":["numeric","scalar"], "purpose":"Step Size"},
+        {"name":"err", "kind":"required", "type":["numeric","scalar","positive"], "purpose":"Precision"},
+        {"name":"ErrorNorm", "kind":"namevalue", "type":["choices={'Auto','MaxL2','FrobeniusL2'}"], "purpose":"Error Norm"},
+        {"name":"QWiener", "kind":"namevalue", "type":["numeric","column"], "purpose":"Eigenvalues of Covariance Operator"}
+     ]
+  },
+  "levyarea.simulate":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Wiener Increment"},
+        {"name":"h", "kind":"required", "type":["numeric","scalar"], "purpose":"Step Size"},
+        {"name":"err", "kind":"required", "type":["numeric","scalar","positive"], "purpose":"Precision"},
+        {"name":"ito", "kind":"required", "type":["logical","scalar"], "purpose":"Ito Interpretation"},
+        {"name":"alg", "kind":"required", "type":["choices={'Auto','Fourier','Milstein','Wiktorsson','MR'}"], "purpose": "Algorithm"},
+        {"name":"q_12", "kind":"required", "type":["numeric","column"], "purpose":"Eigenvalues of Covariance Operator"},
+        {"name":"err_norm", "kind":"required", "type":["choices={'Auto','MaxL2','FrobeniusL2'}"], "purpose":"Error Norm"}
+     ]
+  }
+}
