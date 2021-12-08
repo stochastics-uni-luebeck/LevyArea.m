@@ -14,7 +14,8 @@
     <param.products.version />
     <param.platforms />
     <param.guid>93efea78-b7d7-4ef4-ade4-85b750fc8206</param.guid>
-    <param.exclude.filters>.*</param.exclude.filters>
+    <param.exclude.filters>.*
+example.m</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
     <param.examples />
     <param.demosxml />
