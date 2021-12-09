@@ -1,5 +1,15 @@
 function I = simulate(W, h, err, ito, alg, q_12, err_norm)
 %SIMULATE The core routine to simulate iterated integrals.
+%   I = SIMULATE(W,H,Err,Ito,Alg,QHalf,ErrNorm) calculates the correct
+%   cut-off parameter for the chosen algorithm using the given information
+%   and then calls that algorithm. This function also handles the scaling
+%   of the iterated integrals, i.e. W can be a Q-Wiener increment over
+%   stepsize H. Return value is the matrix of iterated integrals (not the
+%   Levy areas).
+%
+%   This function does no special parameter handling, i.e. all arguments
+%   are required and positional arguments.
+%
 % See also ITERATED_INTEGRALS, OPTIMAL_ALGORITHM.
 
 % check number of input arguments
@@ -28,20 +38,20 @@ sqcov = sqrt(h)*q_12;
 switch lower(alg)
     case "fourier"
         n = ceil( 1.5*(norm_coeff*h/(pi*err))^2 );
-        I = diag(sqcov)*levyarea_fourier(W./sqcov,n)*diag(sqcov);
+        I = diag(sqcov)*levyarea.fourier(W./sqcov,n)*diag(sqcov);
     case "milstein"
         n = ceil( 0.5*(norm_coeff*h/(pi*err))^2 );
-        I = diag(sqcov)*levyarea_milstein(W./sqcov,n)*diag(sqcov);
+        I = diag(sqcov)*levyarea.milstein(W./sqcov,n)*diag(sqcov);
     case "wiktorsson"
         n = ceil( sqrt(5*m/12) * norm_coeff*h/(pi*err) );
-        I = diag(sqcov)*levyarea_wik(W./sqcov,n)*diag(sqcov);
-    case "mr"
+        I = diag(sqcov)*levyarea.wiktorsson(W./sqcov,n)*diag(sqcov);
+    case "mronroe"
         n = ceil( sqrt(m/12) * norm_coeff*h/(pi*err) );
-        I = diag(sqcov)*levyarea_mr(W./sqcov,n)*diag(sqcov);
+        I = diag(sqcov)*levyarea.mronroe(W./sqcov,n)*diag(sqcov);
     otherwise
         error("Unknown algorithm for Q-Wiener processes: " + ...
             ip.Results.Algorithm + ...
-            ". Possible choices are: Fourier, Milstein, Wiktorsson, MR.");
+            ". Possible choices are: Fourier, Milstein, Wiktorsson, MronRoe.");
 end
 
 % calculate iterated integrals
@@ -53,49 +63,3 @@ if ito
 end
 
 end % simulate
-
-
-function I = levyarea_fourier(W, n)
-    m = length(W);
-    alpha = randn(n,m);
-    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-    S = beta * alpha;
-    I = (S-S')/(2*pi);
-end % levyarea_fourier
-
-
-function I = levyarea_milstein(W, n)
-    m = length(W);
-    alpha = randn(n,m);
-    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-    S = beta * alpha;
-    M = randn(1,m);
-    S = S + sqrt(2*psi(1,n+1)) * W.*M;
-    I = (S-S')/(2*pi);
-end % levyarea_milstein
-
-
-function G = levyarea_wik(W, n)
-    m = length(W);
-    alpha = randn(n,m);
-    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-    S = beta * alpha;
-    G = zeros(m);
-    G(tril(true(m),-1)) = sqrt(2*psi(1,n+1)) .* randn(m*(m-1)/2,1);
-    S = S + ((G-G')*W).*W'./(1+sqrt(1+norm(W)^2)) + G;
-    G = (S-S')/(2*pi);
-end % levyarea_wik
-
-
-function G = levyarea_mr(W, n)
-    m = length(W);
-    alpha = randn(n,m);
-    beta = (randn(m,n) - sqrt(2).*W) ./ (1:n);
-    S = beta * alpha;
-    M = randn(1,m);
-    G = zeros(m);
-    G(tril(true(m),-1)) = randn(m*(m-1)/2,1);
-    S = S + sqrt(2*psi(1,n+1)) * (W.*M + G);
-    G = (S-S')/(2*pi);
-end % levyarea_mr
-

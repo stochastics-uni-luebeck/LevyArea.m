@@ -1,6 +1,7 @@
 function [] = example()
 % Make sure the Matlab package folder `+levyarea` is
 % in your current working directory or on your `path`.
+% Alternatively you can install the toolbox file LevyArea.mltbx.
 % Generate a Wiener increment
 m = 100;
 h = 0.01;
@@ -15,7 +16,7 @@ II = levyarea.iterated_integrals(W,h);
 II = levyarea.iterated_integrals(W,h,err);
 
 % The algorithm can be chosen using a keyword argument:
-% 'Fourier', 'Milstein', 'Wiktorsson' or 'MR'
+% 'Fourier', 'Milstein', 'Wiktorsson' or 'MronRoe'
 II = levyarea.iterated_integrals(W,h,'Algorithm','Milstein');
 
 % The error criterion can be chosen using a keyword:

@@ -1,6 +1,6 @@
 function alg = optimal_algorithm(dim, h, err, varargin)
 %OPTIMAL_ALGORITHM Determines the optimal algorithm for iterated_integrals.
-%   ALG = OPTIMAL_ALGORITHM(Dim,H,Err) determines the optimal algorithm
+%   Alg = OPTIMAL_ALGORITHM(Dim,H,Err) determines the optimal algorithm
 %   under the given parameters, i.e. the algorithm that needs to simulate
 %   the fewest random numbers to achieve the desired precision.
 %
@@ -47,7 +47,7 @@ switch lower(err_norm)
 end
 
 % available Algorithms
-algs = ["Fourier","Milstein","Wiktorsson","MR"];
+algs = ["Fourier","Milstein","Wiktorsson","MronRoe"];
 
 % Fourier
 n = ceil( 1.5*(norm_coeff*h/(pi*err))^2 );
@@ -58,7 +58,7 @@ costs(2) = 2*n*dim+dim;
 % Wiktorsson
 n = ceil( sqrt(5*dim/12) * norm_coeff*h/(pi*err) );
 costs(3) = 2*n*dim+(dim^2-dim)/2;
-% MR
+% Mrongowius-Roessler
 n = ceil( sqrt(dim/12) * norm_coeff*h/(pi*err) );
 costs(4) = 2*n*dim+(dim^2-dim)/2+dim;
 

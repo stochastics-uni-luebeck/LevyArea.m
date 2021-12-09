@@ -26,7 +26,7 @@ function I = iterated_integrals(W, h, varargin)
 %   'Algorithm', the algorithm to use for the simulation
 %
 %       Possible values are 'Auto', 'Fourier', 'Milstein', 'Wiktorsson'
-%       and 'MR'. 'Auto' chooses the algorithm according to
+%       and 'MronRoe'. 'Auto' chooses the algorithm according to
 %       `levyarea.optimal_algorithm`. 
 %       The default value is 'Auto'.
 %

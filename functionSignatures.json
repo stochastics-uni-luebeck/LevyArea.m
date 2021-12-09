@@ -21,7 +21,7 @@
         {"name":"h", "kind":"required", "type":["numeric","scalar"], "purpose":"Step Size"},
         {"name":"err", "kind":"required", "type":["numeric","scalar","positive"], "purpose":"Precision"},
         {"name":"ErrorNorm", "kind":"namevalue", "type":["choices={'Auto','MaxL2','FrobeniusL2'}"], "purpose":"Error Norm"},
-        {"name":"QWiener", "kind":"namevalue", "type":["numeric","column"], "purpose":"Eigenvalues of Covariance Operator"}
+        {"name":"QWiener", "kind":"namevalue", "type":["numeric","column"], "purpose":"Square Roots of Eigenvalues of Covariance Operator"}
      ]
   },
   "levyarea.simulate":
@@ -33,8 +33,40 @@
         {"name":"err", "kind":"required", "type":["numeric","scalar","positive"], "purpose":"Precision"},
         {"name":"ito", "kind":"required", "type":["logical","scalar"], "purpose":"Ito Interpretation"},
         {"name":"alg", "kind":"required", "type":["choices={'Auto','Fourier','Milstein','Wiktorsson','MR'}"], "purpose": "Algorithm"},
-        {"name":"q_12", "kind":"required", "type":["numeric","column"], "purpose":"Eigenvalues of Covariance Operator"},
+        {"name":"q_12", "kind":"required", "type":["numeric","column"], "purpose":"Square Roots of Eigenvalues of Covariance Operator"},
         {"name":"err_norm", "kind":"required", "type":["choices={'Auto','MaxL2','FrobeniusL2'}"], "purpose":"Error Norm"}
+     ]
+  },
+  "levyarea.fourier":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Standard Wiener Increment"},
+        {"name":"n", "kind":"required", "type":["numeric","scalar"], "purpose":"Cut-Off Parameter"}
+     ]
+  },
+  "levyarea.milstein":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Standard Wiener Increment"},
+        {"name":"n", "kind":"required", "type":["numeric","scalar"], "purpose":"Cut-Off Parameter"}
+     ]
+  },
+  "levyarea.wiktorsson":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Standard Wiener Increment"},
+        {"name":"n", "kind":"required", "type":["numeric","scalar"], "purpose":"Cut-Off Parameter"}
+     ]
+  },
+  "levyarea.mronroe":
+  {
+     "inputs":
+     [
+        {"name":"W", "kind":"required", "type":["numeric","column"], "purpose":"Standard Wiener Increment"},
+        {"name":"n", "kind":"required", "type":["numeric","scalar"], "purpose":"Cut-Off Parameter"}
      ]
   }
 }
