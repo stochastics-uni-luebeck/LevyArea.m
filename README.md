@@ -1,6 +1,9 @@
 # LevyArea.m
 *Iterated Stochastic Integrals in Matlab*
 
+[![DOI](https://zenodo.org/badge/359793186.svg)](https://zenodo.org/badge/latestdoi/359793186)
+
+
 This package implements state-of-the-art methods for the simulation of iterated stochastic integrals.
 These appear e.g. in higher order algorithms for the solution of stochastic (partial) differential equations.
 
