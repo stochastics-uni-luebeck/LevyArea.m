@@ -1,8 +1,9 @@
 # LevyArea.m
 *Iterated Stochastic Integrals in Matlab*
 
-[![DOI](https://zenodo.org/badge/359793186.svg)](https://zenodo.org/badge/latestdoi/359793186)
 [![View LevyArea on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/105505-levyarea)
+[![DOI](https://zenodo.org/badge/359793186.svg)](https://zenodo.org/badge/latestdoi/359793186)
+[![arXiv](https://img.shields.io/badge/arXiv-2201.08424-blue.svg)](https://arxiv.org/abs/2201.08424)
 
 
 This package implements state-of-the-art methods for the simulation of iterated stochastic integrals.
@@ -102,6 +103,9 @@ can be found using the `help` function:
 >> help iterated_integrals
 >> help levyarea.optimal_algorithm
 ```
+
+## Citing
+Please cite this package and/or the accompanying paper if you found this package useful. Example BibLaTeX code can be found in the [CITATION.bib](CITATION.bib) file.
 
 ## Related Packages
 
