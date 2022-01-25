@@ -2,7 +2,7 @@
 *Iterated Stochastic Integrals in Matlab*
 
 [![View LevyArea on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://de.mathworks.com/matlabcentral/fileexchange/105505-levyarea)
-[![DOI](https://zenodo.org/badge/359793186.svg)](https://zenodo.org/badge/latestdoi/359793186)
+[![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.5883929-blue.svg)](https://doi.org/10.5281/zenodo.5883929) <!-- Concept DOI -->
 [![arXiv](https://img.shields.io/badge/arXiv-2201.08424-blue.svg)](https://arxiv.org/abs/2201.08424)
 
 
