@@ -1,7 +1,8 @@
-function [] = example()
-% Make sure the Matlab package folder `+levyarea` is
-% in your current working directory or on your `path`.
-% Alternatively you can install the toolbox file LevyArea.mltbx.
+% Example script for LevyArea.m
+
+% Make sure the MATLAB toolbox folder `LevyArea.m` is on your `path`
+LevyArea_setup
+
 % Generate a Wiener increment
 m = 100;
 h = 0.01;
@@ -28,5 +29,3 @@ II = levyarea.iterated_integrals(W,h,err,'ErrorNorm','FrobeniusL2');
 q = 1./(1:m)'.^2;
 QW = sqrt(h) * sqrt(q) .* randn(m,1);
 IIQ = levyarea.iterated_integrals(QW,h,err,'QWiener',sqrt(q));
-
-end
