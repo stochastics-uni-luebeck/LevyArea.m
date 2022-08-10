@@ -1,5 +1,5 @@
 % LevyArea.m -- Simulate iterated stochastic integrals in MATLAB.
-% Version 1.0.0 20-Jan-2022
+% Version 1.0.1 10-Aug-2022
 %
 % Files
 %   LevyArea_setup - Set up search paths for LevyArea.m

@@ -1,5 +1,5 @@
 % levyarea package -- Part of LevyArea.m.
-% Version 1.0.0 20-Jan-2022
+% Version 1.0.1 10-Aug-2022
 %
 % Main routines
 %   iterated_integrals - Simulates twice iterated stochastic integrals.
