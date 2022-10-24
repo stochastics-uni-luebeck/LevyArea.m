@@ -1,21 +1,20 @@
 <deployment-project plugin="plugin.toolbox" plugin-version="1.0">
   <configuration build-checksum="2428419616" file="${PROJECT_ROOT}/LevyArea.prj" location="${PROJECT_ROOT}" name="LevyArea" target="target.toolbox" target-name="Package Toolbox">
-    <param.appname>LevyArea</param.appname>
+    <param.appname>LevyArea.m</param.appname>
     <param.authnamewatermark>Felix Kastner</param.authnamewatermark>
     <param.email>kastner.felix@gmail.com</param.email>
     <param.company />
     <param.summary>Simulate iterated stochastic integrals in Matlab.</param.summary>
     <param.description />
     <param.screenshot />
-    <param.version>1.0.0</param.version>
+    <param.version>1.0.1</param.version>
     <param.output>${PROJECT_ROOT}/LevyArea.mltbx</param.output>
     <param.products.name />
     <param.products.id />
     <param.products.version />
     <param.platforms />
     <param.guid>93efea78-b7d7-4ef4-ade4-85b750fc8206</param.guid>
-    <param.exclude.filters>.*
-example.m</param.exclude.filters>
+    <param.exclude.filters>.*</param.exclude.filters>
     <param.exclude.pcodedmfiles>true</param.exclude.pcodedmfiles>
     <param.examples />
     <param.demosxml />
