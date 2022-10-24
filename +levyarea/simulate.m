@@ -49,8 +49,7 @@ switch lower(alg)
         n = ceil( sqrt(m/12) * norm_coeff*h/(pi*err) );
         I = diag(sqcov)*levyarea.mronroe(W./sqcov,n)*diag(sqcov);
     otherwise
-        error("Unknown algorithm for Q-Wiener processes: " + ...
-            ip.Results.Algorithm + ...
+        error("Unknown algorithm: " + alg + ...
             ". Possible choices are: Fourier, Milstein, Wiktorsson, MronRoe.");
 end
 

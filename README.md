@@ -11,8 +11,9 @@ These appear e.g. in higher order algorithms for the solution of stochastic (par
 
 ## Installation
 
-Install the Matlab toolbox file (`LevyArea.mltbx`) from the [Releases](https://github.com/stochastics-uni-luebeck/LevyArea.m/releases) page or through the Add-On Explorer.
-Alternatively you can copy the folder `+levyarea` into your current working directory or into a folder on your Matlab path.
+Install the Matlab toolbox file (`LevyArea.mltbx`) from the [Releases](https://github.com/stochastics-uni-luebeck/LevyArea.m/releases) page or through the Matlab Add-On Explorer.
+Alternatively you can download the files into a folder and add it to your Matlab path.
+You can do this either manually or by calling the `LevyArea_setup.m` script.
 
 ## Example
 
