@@ -10,7 +10,7 @@ if savepath
     warning("Savepath failed. You may have to re-run LevyArea_setup" + ...
         " in each new MATLAB session.")
 else
-    disp("LevyArea.m was successfully addded to the MATLAB path.")
+    disp("LevyArea.m was successfully added to the MATLAB path.")
 end
 
 end
